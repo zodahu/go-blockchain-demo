@@ -27,23 +27,23 @@ func CreateGenesisBlock(data string) *Block {
 
 // CreateBlock creates a new block
 func CreateBlock(height int64, prevBlockHash []byte, data string) *Block {
-	b := &Block{Height: height, PrevBlockHash: prevBlockHash, Data: []byte(data), Timestamp: time.Now().Unix(), Hash: nil, Nonce: 0}
+	blc := &Block{Height: height, PrevBlockHash: prevBlockHash, Data: []byte(data), Timestamp: time.Now().Unix(), Hash: nil, Nonce: 0}
 
-	pow := NewProofOfWork(b)
+	pow := NewProofOfWork(blc)
 	hash, nonce := pow.Run()
 
-	b.Hash = hash[:]
-	b.Nonce = nonce
+	blc.Hash = hash[:]
+	blc.Nonce = nonce
 
-	return b
+	return blc
 }
 
 // Serialize converts block to []byte
-func (b *Block) Serialize() []byte {
+func (blc *Block) Serialize() []byte {
 	var res bytes.Buffer
 	encoder := gob.NewEncoder(&res)
 
-	err := encoder.Encode(b)
+	err := encoder.Encode(blc)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -53,29 +53,29 @@ func (b *Block) Serialize() []byte {
 
 // Deserialize converts []byte to block
 func Deserialize(blockBytes []byte) *Block {
-	var b Block
+	var blc Block
 
 	decoder := gob.NewDecoder(bytes.NewReader(blockBytes))
-	err := decoder.Decode(&b)
+	err := decoder.Decode(&blc)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	return &b
+	return &blc
 }
 
-// SetHash is unused
-func (b *Block) SetHash() {
+// SetHash is unused currently
+func (blc *Block) SetHash() {
 	// Covert elements to []byte
 
-	hBytes := Int64ToHex(b.Height)
+	hBytes := Int64ToHex(blc.Height)
 
-	tsString := strconv.FormatInt(b.Timestamp, 2)
+	tsString := strconv.FormatInt(blc.Timestamp, 2)
 	tsBytes := []byte(tsString)
 
-	blockBytes := bytes.Join([][]byte{hBytes, b.PrevBlockHash, b.Data, tsBytes, b.Hash}, []byte{})
+	blockBytes := bytes.Join([][]byte{hBytes, blc.PrevBlockHash, blc.Data, tsBytes, blc.Hash}, []byte{})
 
 	hash := sha256.Sum256(blockBytes)
-	b.Hash = hash[:]
+	blc.Hash = hash[:]
 
 }
